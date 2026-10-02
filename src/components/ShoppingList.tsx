@@ -11,7 +11,6 @@ import {
   Trash2,
   Utensils,
   CheckCircle,
-  AlertCircle,
   Users
 } from 'lucide-react';
 import { Recipe, ShoppingItem } from '../types';
@@ -49,37 +48,15 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
   const [extraName, setExtraName] = useState('');
   const [extraCost, setExtraCost] = useState('');
   const [copiedToast, setCopiedToast] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'exito' | 'error'; message: string } | null>(null);
 
-  // Manejo de agregar item extra con validación clara
+  // Manejo de agregar item extra
   const handleAddExtra = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!extraName.trim()) {
-      setFeedback({
-        type: 'error',
-        message: 'Por favor escribí el nombre del producto que querés sumar a la lista.'
-      });
-      return;
-    }
-
-    const parsedCost = Number(extraCost);
-    if (extraCost && (isNaN(parsedCost) || parsedCost < 0)) {
-      setFeedback({
-        type: 'error',
-        message: 'El precio estimado debe ser un número válido.'
-      });
-      return;
-    }
-
-    onAddExtraItem(extraName.trim(), parsedCost || 0);
+    if (!extraName.trim()) return;
+    const parsedCost = Number(extraCost) || 0;
+    onAddExtraItem(extraName.trim(), parsedCost);
     setExtraName('');
     setExtraCost('');
-
-    setFeedback({
-      type: 'exito',
-      message: '¡Producto extra agregado a tu lista de compras!'
-    });
-    setTimeout(() => setFeedback(null), 3000);
   };
 
   // Compartir o copiar lista de compras
@@ -125,7 +102,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedToast(true);
-      setTimeout(() => setCopiedToast(false), 4000);
+      setTimeout(() => setCopiedToast(false), 3000);
     });
   };
 
@@ -137,150 +114,127 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
   const remainingBudgetToPay = Math.max(0, totalShoppingBudget - spentShoppingBudget);
 
   return (
-    <div className="pb-32">
+    <div className="pb-28">
       {/* Título Función 3 */}
       <div className="mb-4">
-        <span className="text-base font-black text-emerald-800 dark:text-emerald-400 tracking-wide uppercase block">
+        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide uppercase">
           Paso 3 de 3
         </span>
-        <h2 className="text-2xl font-black text-stone-950 dark:text-white leading-tight">
+        <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
           Lista de lo que falta comprar
         </h2>
-        <p className="text-base font-medium text-stone-800 dark:text-stone-200 mt-1">
-          Solo los ingredientes que te faltan en casa, presentados por paquete comercial para no gastar de más.
+        <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
+          Solo los ingredientes que no tenés en casa, en su tamaño de compra habitual y con el total exacto a llevar al almacén o súper.
         </p>
       </div>
 
-      {/* Mensajes de feedback visibles */}
-      {feedback && (
-        <div
-          role="alert"
-          className={`mb-4 p-3.5 rounded-2xl border-2 flex items-center gap-2.5 ${
-            feedback.type === 'exito'
-              ? 'bg-emerald-100 dark:bg-emerald-950 border-emerald-600 dark:border-emerald-500 text-emerald-950 dark:text-emerald-100'
-              : 'bg-rose-100 dark:bg-rose-950 border-rose-600 dark:border-rose-500 text-rose-950 dark:text-rose-100'
-          }`}
-        >
-          {feedback.type === 'exito' ? (
-            <CheckCircle className="w-6 h-6 shrink-0 text-emerald-700 dark:text-emerald-400" />
-          ) : (
-            <AlertCircle className="w-6 h-6 shrink-0 text-rose-700 dark:text-rose-400" />
-          )}
-          <span className="text-base font-bold">{feedback.message}</span>
-        </div>
-      )}
-
-      {/* ESTADO VACÍO: cuando no hay receta seleccionada */}
-      {!currentRecipe ? (
-        <div className="p-5 rounded-3xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 dark:border-amber-700 text-stone-950 dark:text-white space-y-3 text-center mb-4">
-          <AlertCircle className="w-8 h-8 text-amber-700 dark:text-amber-400 mx-auto" />
-          <h3 className="text-xl font-black text-stone-950 dark:text-white">
-            Todavía no has seleccionado un almuerzo
-          </h3>
-          <p className="text-base font-semibold text-stone-800 dark:text-stone-200">
-            Andá al Paso 2 para elegir un plato y ver qué ingredientes te faltan.
-          </p>
-          <button
-            type="button"
-            onClick={onGoToLunchBuilder}
-            className="w-full min-h-[50px] py-3 px-4 bg-stone-950 dark:bg-emerald-600 text-white font-bold text-base rounded-2xl"
-          >
-            Ir al Paso 2: Elegir Almuerzo
-          </button>
-        </div>
-      ) : (
-        /* Tarjeta de Almuerzo Asociado */
-        <div className="bg-stone-50 dark:bg-stone-900 border-2 border-stone-300 dark:border-stone-700 rounded-3xl p-4 mb-4">
+      {/* Tarjeta de Almuerzo Asociado */}
+      {currentRecipe ? (
+        <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-4 mb-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <span className="text-base font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wide block">
-                Almuerzo elegido:
+            <div>
+              <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">
+                Almuerzo seleccionado:
               </span>
-              <h3 className="text-xl font-black text-stone-950 dark:text-white leading-tight">
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 leading-snug">
                 {currentRecipe.title}
               </h3>
-              <div className="flex items-center gap-2 text-base font-bold text-stone-700 dark:text-stone-300 mt-1">
-                <Users className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
+              <div className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 mt-1">
+                <Users className="w-3.5 h-3.5" />
                 <span>
-                  {servings} {servings === 1 ? 'plato' : 'platos'}
+                  {servings} {servings === 1 ? 'porción' : 'porciones'}
                 </span>
                 <span aria-hidden="true">·</span>
-                <span>{currentRecipe.timeMinutes} min</span>
+                <span>{currentRecipe.timeMinutes} min de preparación</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={onGoToLunchBuilder}
-              className="min-h-[48px] px-3.5 py-2 bg-white dark:bg-stone-800 border-2 border-stone-400 dark:border-stone-600 text-stone-950 dark:text-white text-base font-bold rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 shrink-0 transition-colors"
+              className="min-h-[38px] px-3 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 shrink-0 transition-colors"
             >
               Cambiar plato
             </button>
           </div>
         </div>
+      ) : (
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-4 text-center">
+          <p className="text-xs text-amber-900 dark:text-amber-300 mb-2">
+            No has seleccionado ningún almuerzo todavía.
+          </p>
+          <button
+            type="button"
+            onClick={onGoToLunchBuilder}
+            className="px-4 py-2 bg-stone-900 dark:bg-emerald-600 text-white text-xs font-medium rounded-lg"
+          >
+            Ir al Paso 2: Elegir Almuerzo
+          </button>
+        </div>
       )}
 
-      {/* Resumen de Presupuesto en Caja de Alto Contraste */}
-      <div className="bg-stone-950 dark:bg-stone-900 text-white rounded-3xl p-4 mb-4 border-2 border-stone-800 dark:border-stone-700 shadow-lg">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+      {/* Resumen de Presupuesto de Bolsillo */}
+      <div className="bg-stone-900 dark:bg-stone-800/90 text-white rounded-2xl p-4 mb-4 shadow-sm border border-transparent dark:border-stone-700">
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <span className="text-base font-bold text-stone-300 block">
-              Total a gastar en el súper:
+            <span className="text-[11px] text-stone-400 block font-medium">
+              Total estimado a gastar:
             </span>
-            <span className="text-3xl font-black tabular-nums text-white block">
+            <span className="text-2xl font-bold tabular-nums text-white">
               {formatCurrency(totalShoppingBudget)}
             </span>
           </div>
 
-          <div className="sm:border-l sm:border-stone-700 sm:pl-3 pt-2 sm:pt-0 border-t border-stone-800 sm:border-t-0">
-            <span className="text-base font-bold text-stone-300 block">
+          <div className="border-l border-stone-700 pl-3">
+            <span className="text-[11px] text-stone-400 block font-medium">
               Resta pagar en caja:
             </span>
-            <span className="text-3xl font-black tabular-nums text-emerald-400 block">
+            <span className="text-2xl font-bold tabular-nums text-emerald-400">
               {formatCurrency(remainingBudgetToPay)}
             </span>
           </div>
         </div>
 
-        <div className="pt-2 border-t border-stone-800 text-base font-semibold text-stone-300 flex items-center justify-between">
+        {/* Barra de progreso de la compra */}
+        <div className="pt-2 border-t border-stone-800 dark:border-stone-700 flex items-center justify-between text-xs text-stone-400">
           <span>
-            {boughtItemsCount} de {totalItemsCount} productos comprados
+            {boughtItemsCount} de {totalItemsCount} comprados
           </span>
           {spentShoppingBudget > 0 && (
-            <span>Tachado: {formatCurrency(spentShoppingBudget)}</span>
+            <span>Ya tachaste {formatCurrency(spentShoppingBudget)}</span>
           )}
         </div>
       </div>
 
-      {/* ESTADO VACÍO (Requisito 5: cuando no hay que comprar nada) */}
-      {shoppingList.length === 0 && currentRecipe && (
-        <div className="bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-600 dark:border-emerald-500 rounded-3xl p-6 text-center mb-4 space-y-2">
-          <div className="w-14 h-14 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300 flex items-center justify-center mx-auto mb-2">
-            <Utensils className="w-7 h-7" />
+      {/* ESTADO VACÍO (cuando la lista de compras tiene 0 items faltantes) */}
+      {shoppingList.length === 0 && (
+        <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 text-center mb-4">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center mx-auto mb-3">
+            <Utensils className="w-6 h-6" />
           </div>
-          <h4 className="text-xl font-black text-emerald-950 dark:text-white">
+          <h4 className="text-base font-bold text-emerald-950 dark:text-emerald-200 mb-1">
             ¡Tu lista de compras está vacía!
           </h4>
-          <p className="text-base font-bold text-emerald-900 dark:text-emerald-200">
-            Ya tenés todos los ingredientes en casa para cocinar este almuerzo sin gastar dinero hoy.
+          <p className="text-xs text-emerald-800 dark:text-emerald-300 max-w-sm mx-auto mb-4">
+            Tenés todos los ingredientes necesarios en tu alacena para cocinar este almuerzo sin gastar dinero hoy.
           </p>
           <button
             type="button"
             onClick={onGoToLunchBuilder}
-            className="w-full min-h-[48px] px-4 py-2.5 bg-emerald-800 dark:bg-emerald-600 hover:bg-emerald-900 text-white text-base font-black rounded-2xl transition-colors mt-2"
+            className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-colors"
           >
-            Ver preparación y cocinar
+            <span>Ver receta y cómo cocinarlo</span>
           </button>
         </div>
       )}
 
-      {/* Lista de compras con casillas grandes (Uso con una sola mano) */}
+      {/* Lista de compras interactiva */}
       {shoppingList.length > 0 && (
-        <div className="space-y-2.5 mb-4">
-          <div className="flex items-center justify-between text-base font-black text-stone-950 dark:text-white px-1">
-            <span>Ingredientes a comprar ({pendingCount} pendientes):</span>
-            <span className="text-base font-semibold text-stone-600 dark:text-stone-400">
-              Tocá para tachar
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-stone-700 dark:text-stone-300 px-1">
+            <span>Ingredientes a comprar ({pendingCount} pendientes)</span>
+            <span className="text-[11px] text-stone-400 dark:text-stone-500 font-normal">
+              Tocá para tachar al poner en el changuito
             </span>
           </div>
 
@@ -289,52 +243,50 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
               type="button"
               key={item.ingredientId}
               onClick={() => onToggleItemBought(item.ingredientId)}
-              className={`w-full min-h-[64px] p-3.5 rounded-2xl border-2 text-left flex items-center justify-between gap-3 transition-all select-none ${
+              className={`w-full min-h-[58px] p-3 rounded-xl border text-left flex items-center justify-between transition-all select-none ${
                 item.isBought
-                  ? 'bg-stone-100 dark:bg-stone-900/60 border-stone-300 dark:border-stone-800 text-stone-500 dark:text-stone-500'
-                  : 'bg-white dark:bg-stone-900 border-stone-400 dark:border-stone-700 hover:border-stone-600'
+                  ? 'bg-stone-50 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500'
+                  : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 shadow-xs'
               }`}
             >
-              <div className="flex items-center gap-3 min-w-0 pr-1">
+              <div className="flex items-center gap-3 min-w-0 pr-2">
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border-2 transition-colors ${
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     item.isBought
-                      ? 'bg-stone-400 dark:bg-stone-700 border-stone-400 dark:border-stone-700 text-white'
-                      : 'border-stone-500 dark:border-stone-500 bg-stone-50 dark:bg-stone-800 text-transparent'
+                      ? 'bg-stone-300 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                      : 'border-2 border-stone-300 dark:border-stone-600 text-transparent'
                   }`}
                 >
-                  <Check className="w-5 h-5 stroke-[3.5]" />
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
 
                 <div className="min-w-0">
                   <p
-                    className={`text-base font-black truncate ${
+                    className={`text-sm font-semibold truncate ${
                       item.isBought
-                        ? 'line-through text-stone-500 dark:text-stone-500'
-                        : 'text-stone-950 dark:text-white'
+                        ? 'line-through text-stone-400 dark:text-stone-500'
+                        : 'text-stone-900 dark:text-stone-100'
                     }`}
                   >
                     {item.name}
                   </p>
-                  <p className="text-base font-bold text-stone-700 dark:text-stone-300 truncate">
-                    {item.packPresentation} · ({item.neededForServings})
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    {item.packPresentation} · Para {item.neededForServings}
                   </p>
                 </div>
               </div>
 
               <div className="text-right shrink-0">
                 <span
-                  className={`text-lg font-black tabular-nums block ${
+                  className={`text-sm font-bold tabular-nums block ${
                     item.isBought
-                      ? 'line-through text-stone-500 dark:text-stone-500'
-                      : 'text-stone-950 dark:text-white'
+                      ? 'line-through text-stone-400 dark:text-stone-500'
+                      : 'text-stone-900 dark:text-stone-100'
                   }`}
                 >
                   {formatCurrency(item.estimatedCost)}
                 </span>
-                <span className="text-base font-semibold text-stone-600 dark:text-stone-400 block">
-                  precio est.
-                </span>
+                <span className="text-[10px] text-stone-400 dark:text-stone-500 block">precio est.</span>
               </div>
             </button>
           ))}
@@ -343,18 +295,18 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
 
       {/* Extras agregados */}
       {extraShoppingItems.length > 0 && (
-        <div className="space-y-2.5 mb-4">
-          <div className="text-base font-black text-stone-950 dark:text-white px-1">
-            <span>Extras anotados ({extraShoppingItems.length}):</span>
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-stone-700 dark:text-stone-300 px-1">
+            <span>Extras anotados ({extraShoppingItems.length})</span>
           </div>
 
           {extraShoppingItems.map((extra) => (
             <div
               key={extra.id}
-              className={`min-h-[60px] p-3 rounded-2xl border-2 flex items-center justify-between gap-2 ${
+              className={`min-h-[52px] p-3 rounded-xl border flex items-center justify-between ${
                 extra.isBought
-                  ? 'bg-stone-100 dark:bg-stone-900/60 border-stone-300 dark:border-stone-800 text-stone-500 dark:text-stone-500'
-                  : 'bg-white dark:bg-stone-900 border-stone-400 dark:border-stone-700'
+                  ? 'bg-stone-50 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500'
+                  : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-xs'
               }`}
             >
               <button
@@ -363,28 +315,28 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
                 className="flex items-center gap-3 min-w-0 flex-1 text-left py-1"
               >
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border-2 ${
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                     extra.isBought
-                      ? 'bg-stone-400 dark:bg-stone-700 border-stone-400 dark:border-stone-700 text-white'
-                      : 'border-stone-500 dark:border-stone-500 bg-stone-50 dark:bg-stone-800 text-transparent'
+                      ? 'bg-stone-300 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                      : 'border-2 border-stone-300 dark:border-stone-600 text-transparent'
                   }`}
                 >
-                  <Check className="w-5 h-5 stroke-[3.5]" />
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
                 <span
-                  className={`text-base font-black truncate ${
-                    extra.isBought ? 'line-through text-stone-500' : 'text-stone-950 dark:text-white'
+                  className={`text-sm font-medium truncate ${
+                    extra.isBought ? 'line-through text-stone-400 dark:text-stone-500' : 'text-stone-900 dark:text-stone-100'
                   }`}
                 >
                   {extra.name}
                 </span>
               </button>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2">
                 {extra.cost > 0 && (
                   <span
-                    className={`text-base font-black tabular-nums ${
-                      extra.isBought ? 'line-through text-stone-500' : 'text-stone-950 dark:text-white'
+                    className={`text-xs font-bold tabular-nums ${
+                      extra.isBought ? 'line-through text-stone-400 dark:text-stone-500' : 'text-stone-800 dark:text-stone-200'
                     }`}
                   >
                     {formatCurrency(extra.cost)}
@@ -394,9 +346,9 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
                   type="button"
                   onClick={() => onRemoveExtraItem(extra.id)}
                   aria-label={`Eliminar extra ${extra.name}`}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-rose-700"
+                  className="min-h-[36px] min-w-[36px] flex items-center justify-center text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -404,86 +356,66 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
         </div>
       )}
 
-      {/* Formulario con ETIQUETAS VISIBLES (Requisito 3) */}
+      {/* Formulario rápido para anotar algo más */}
       <form
         onSubmit={handleAddExtra}
-        className="bg-stone-50 dark:bg-stone-900 border-2 border-stone-300 dark:border-stone-700 rounded-3xl p-4 mb-5 space-y-3"
+        className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-3.5 mb-5"
       >
-        <span className="text-base font-black text-stone-950 dark:text-white block">
+        <span className="text-xs font-bold text-stone-800 dark:text-stone-200 block mb-2">
           ¿Necesitás comprar algo más?
         </span>
-
-        <div>
-          <label
-            htmlFor="extra-name-input"
-            className="block text-base font-bold text-stone-950 dark:text-white mb-1"
-          >
-            Nombre del producto extra:
-          </label>
+        <div className="flex gap-2">
           <input
-            id="extra-name-input"
             type="text"
             value={extraName}
             onChange={(e) => setExtraName(e.target.value)}
-            placeholder="Ejemplo: Pan, Fruta, Papel..."
-            className="w-full px-3.5 py-3 bg-white dark:bg-stone-800 border-2 border-stone-400 dark:border-stone-700 text-stone-950 dark:text-white rounded-xl text-base font-semibold focus:ring-2 focus:ring-emerald-600 focus:outline-none"
+            placeholder="Ej: Pan, Fruta, Rollo de cocina..."
+            className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           />
-        </div>
-
-        <div>
-          <label
-            htmlFor="extra-cost-input"
-            className="block text-base font-bold text-stone-950 dark:text-white mb-1"
+          <input
+            type="number"
+            value={extraCost}
+            onChange={(e) => setExtraCost(e.target.value)}
+            placeholder="$ Est."
+            className="w-20 px-2 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!extraName.trim()}
+            className="min-h-[38px] px-3 bg-stone-900 dark:bg-emerald-600 hover:bg-stone-800 dark:hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
           >
-            Precio estimado ($):
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="extra-cost-input"
-              type="number"
-              value={extraCost}
-              onChange={(e) => setExtraCost(e.target.value)}
-              placeholder="Ej: 500"
-              className="flex-1 px-3.5 py-3 bg-white dark:bg-stone-800 border-2 border-stone-400 dark:border-stone-700 text-stone-950 dark:text-white rounded-xl text-base font-semibold focus:ring-2 focus:ring-emerald-600 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="min-h-[48px] px-5 bg-stone-950 hover:bg-stone-800 dark:bg-stone-800 dark:hover:bg-stone-700 text-white text-base font-black rounded-xl border-2 border-stone-800 flex items-center gap-1.5 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Sumar</span>
-            </button>
-          </div>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Sumar</span>
+          </button>
         </div>
       </form>
 
-      {/* Aviso de Lista Copiada (Mensaje visible y en español sin tecnicismos - Requisito 6) */}
-      {copiedToast && (
-        <div className="mb-3 p-3.5 bg-emerald-100 dark:bg-emerald-950 border-2 border-emerald-600 text-emerald-950 dark:text-emerald-100 text-base font-bold rounded-2xl flex items-center justify-center gap-2">
-          <CheckCircle className="w-6 h-6 text-emerald-700 dark:text-emerald-400 shrink-0" />
-          <span>¡Lista copiada! Ya podés pegarla en tu chat de WhatsApp o notas.</span>
-        </div>
-      )}
-
-      {/* EL BOTÓN PRINCIPAL ÚNICO DE ESTA PANTALLA (Requisito 4) */}
-      <div className="space-y-2.5">
+      {/* Botones de Acción */}
+      <div className="flex flex-col gap-2">
         <button
           type="button"
           onClick={handleShareList}
-          className="w-full min-h-[56px] py-3.5 px-4 bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-black text-lg rounded-2xl flex items-center justify-center gap-2.5 shadow-lg transition-transform active:scale-[0.98]"
+          className="w-full min-h-[48px] py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors active:scale-[0.99]"
         >
-          <Share2 className="w-6 h-6" />
-          <span>Compartir lista por WhatsApp o Mensaje</span>
+          <Share2 className="w-4 h-4" />
+          <span>Compartir lista por WhatsApp / Mensaje</span>
         </button>
+
+        {copiedToast && (
+          <div className="text-center py-2 px-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-medium rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-1.5 animate-fade-in">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>¡Lista copiada al portapapeles con formato listo!</span>
+          </div>
+        )}
 
         {boughtItemsCount > 0 && (
           <button
             type="button"
             onClick={onResetPurchases}
-            className="w-full min-h-[48px] py-2.5 px-4 bg-white dark:bg-stone-900 border-2 border-stone-400 dark:border-stone-700 text-stone-900 dark:text-stone-200 font-bold text-base rounded-2xl flex items-center justify-center gap-2 transition-colors"
+            className="w-full min-h-[44px] py-2 px-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 font-medium text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
-            <Trash2 className="w-5 h-5" />
-            <span>Desmarcar productos tachados</span>
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Desmarcar items comprados</span>
           </button>
         )}
       </div>

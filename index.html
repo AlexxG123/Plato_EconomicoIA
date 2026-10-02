@@ -3,6 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Evita que el cliente HMR de Vite ejecute location.reload() al desconectarse el WebSocket en móviles/Cloud Run
+      if (typeof window !== 'undefined') {
+        const NativeWebSocket = window.WebSocket;
+        window.WebSocket = function(url, protocols) {
+          if (protocols === 'vite-hmr' || (typeof url === 'string' && (url.includes('token=') || url.includes('vite-hmr')))) {
+            return {
+              readyState: 1,
+              addEventListener: () => {},
+              removeEventListener: () => {},
+              send: () => {},
+              close: () => {},
+              set onopen(fn) { setTimeout(() => fn && fn({}), 0); },
+              set onmessage(fn) {},
+              set onerror(fn) {},
+              set onclose(fn) {}
+            };
+          }
+          return new NativeWebSocket(url, protocols);
+        };
+        window.WebSocket.prototype = NativeWebSocket.prototype;
+      }
+    </script>
     <title>Plato Económico - Almuerzos al Menor Costo</title>
     <meta name="description" content="App para estudiantes y familias con presupuesto ajustado: elegí lo que tenés en casa, armá tu almuerzo con costo estimado y generá la lista exacta de lo que falta comprar." />
     <meta property="og:title" content="Plato Económico - Almuerzos al Menor Costo" />
