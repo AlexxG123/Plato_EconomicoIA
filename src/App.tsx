@@ -110,6 +110,7 @@ export default function App() {
             onGoToShoppingList={() => handleTabChange('por_comprar')}
             allIngredients={allIngredients}
             pantryIds={pantryIds}
+            onAddMissingItemToShoppingList={(name, cost) => addExtraShoppingItem(name, cost || 1200)}
           />
         )}
 

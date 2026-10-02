@@ -14,10 +14,12 @@ import {
   Users,
   ArrowRight,
   SlidersHorizontal,
-  ChefHat
+  ChefHat,
+  Sparkles
 } from 'lucide-react';
 import { Recipe, Ingredient } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { GeminiNutritionAdvisor } from './GeminiNutritionAdvisor';
 
 interface AnalyzedRecipe extends Recipe {
   ingredientsStatus: Array<{
@@ -50,6 +52,7 @@ interface LunchBuilderProps {
   onGoToShoppingList: () => void;
   allIngredients: Ingredient[];
   pantryIds: string[];
+  onAddMissingItemToShoppingList?: (name: string, cost?: number) => void;
 }
 
 export const LunchBuilder: React.FC<LunchBuilderProps> = ({
@@ -60,11 +63,16 @@ export const LunchBuilder: React.FC<LunchBuilderProps> = ({
   onChangeServings,
   onGoToShoppingList,
   allIngredients,
-  pantryIds
+  pantryIds,
+  onAddMissingItemToShoppingList
 }) => {
   const [filterMode, setFilterMode] = useState<'todos' | 'listos' | 'pocos_faltantes'>('todos');
   const [expandedRecipeId, setExpandedRecipeId] = useState<string | null>(null);
-  const [viewTab, setViewTab] = useState<'sugeridos' | 'personalizado'>('sugeridos');
+  const [viewTab, setViewTab] = useState<'sugeridos' | 'personalizado' | 'balance_ia'>('sugeridos');
+
+  const pantryIngredientsNames = pantryIds
+    .map((id) => allIngredients.find((i) => i.id === id)?.name)
+    .filter(Boolean) as string[];
 
   // Estado para armador de almuerzo personalizado a medida
   const [customBase, setCustomBase] = useState('arroz');
@@ -168,30 +176,42 @@ export const LunchBuilder: React.FC<LunchBuilderProps> = ({
         </div>
       </div>
 
-      {/* Selector de Modo: Recetas Sugeridas vs Armar Propio */}
-      <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-stone-800 rounded-xl mb-4">
+      {/* Selector de Modo: Recetas Sugeridas vs Armar Propio vs Nutrición IA */}
+      <div className="flex items-center gap-1 p-1 bg-stone-100 dark:bg-stone-800 rounded-xl mb-4 overflow-x-auto scrollbar-none">
         <button
           type="button"
           onClick={() => setViewTab('sugeridos')}
-          className={`flex-1 min-h-[38px] py-1 px-3 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
+          className={`flex-1 min-h-[38px] py-1 px-2.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
             viewTab === 'sugeridos'
               ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
           }`}
         >
-          🍲 Almuerzos Sugeridos ({recipes.length})
+          🍲 Recetas ({recipes.length})
         </button>
         <button
           type="button"
           onClick={() => setViewTab('personalizado')}
-          className={`flex-1 min-h-[38px] py-1 px-3 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap flex items-center justify-center gap-1 ${
+          className={`flex-1 min-h-[38px] py-1 px-2.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap flex items-center justify-center gap-1 ${
             viewTab === 'personalizado'
               ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
           }`}
         >
           <ChefHat className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-          <span>Armar a Medida</span>
+          <span>A Medida</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewTab('balance_ia')}
+          className={`flex-1 min-h-[38px] py-1 px-2.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap flex items-center justify-center gap-1 ${
+            viewTab === 'balance_ia'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span>Nutrición IA</span>
         </button>
       </div>
 
@@ -574,6 +594,15 @@ export const LunchBuilder: React.FC<LunchBuilderProps> = ({
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+      )}
+
+      {/* Pestaña 3: Asesor Nutricional IA de Gemini con grupos de alimentos */}
+      {viewTab === 'balance_ia' && (
+        <GeminiNutritionAdvisor
+          pantryIngredients={pantryIngredientsNames}
+          onAddMissingIngredientToShoppingList={onAddMissingItemToShoppingList}
+          onGoToShoppingList={onGoToShoppingList}
+        />
       )}
     </div>
   );

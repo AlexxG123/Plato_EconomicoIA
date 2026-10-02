@@ -4,26 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
-      // Evita que el cliente HMR de Vite ejecute location.reload() al desconectarse el WebSocket en móviles/Cloud Run
+      // Erradicar reinicios automáticos involuntarios causados por el cliente de desarrollo en móviles e iframes
       if (typeof window !== 'undefined') {
-        const NativeWebSocket = window.WebSocket;
-        window.WebSocket = function(url, protocols) {
-          if (protocols === 'vite-hmr' || (typeof url === 'string' && (url.includes('token=') || url.includes('vite-hmr')))) {
-            return {
-              readyState: 1,
-              addEventListener: () => {},
-              removeEventListener: () => {},
-              send: () => {},
-              close: () => {},
-              set onopen(fn) { setTimeout(() => fn && fn({}), 0); },
-              set onmessage(fn) {},
-              set onerror(fn) {},
-              set onclose(fn) {}
-            };
+        // Interceptamos la ruta de ping interno de Vite para que nunca dispare location.reload() en segundo plano
+        const _origFetch = window.fetch;
+        window.fetch = function(...args) {
+          const firstArg = args[0];
+          const url = typeof firstArg === 'string' ? firstArg : (firstArg && firstArg.url);
+          if (typeof url === 'string' && url.includes('__vite_ping')) {
+            // Mantenemos la promesa en espera limpia sin error para evitar que pingServer() llame a reload()
+            return new Promise(() => {});
           }
-          return new NativeWebSocket(url, protocols);
+          return _origFetch.apply(this, args);
         };
-        window.WebSocket.prototype = NativeWebSocket.prototype;
       }
     </script>
     <title>Plato Económico - Almuerzos al Menor Costo</title>
