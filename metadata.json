@@ -1,0 +1,6 @@
+{
+  "name": "Plato Económico",
+  "description": "App para estudiantes y familias con presupuesto ajustado: elegí lo que tenés en casa, armá tu almuerzo con costo estimado y generá la lista exacta de lo que falta comprar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
