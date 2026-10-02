@@ -4,10 +4,18 @@
 
 @layer base {
   html, body {
-    /* Evita que el gesto de deslizar hacia abajo en celulares active el 'pull-to-refresh' del navegador,
-       lo cual causaba que la app se recargara y reiniciara sola */
+    /* Evita que el gesto de deslizar hacia abajo en celulares active el 'pull-to-refresh' del navegador */
     overscroll-behavior-y: contain;
     -webkit-tap-highlight-color: transparent;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    /* Requisito 2: Texto nunca menor a 16px */
+    font-size: 16px;
+    min-width: 320px;
+  }
+
+  /* Garantiza que los campos de formulario nunca bajen de 16px en móviles,
+     lo que previene el auto-zoom accidental que congela o reinicia webviews */
+  input, select, textarea, button {
+    font-size: 16px !important;
   }
 }

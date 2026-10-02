@@ -74,7 +74,7 @@ export default function App() {
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors duration-200">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-stone-100/90 dark:bg-stone-950 text-stone-950 dark:text-white font-sans antialiased selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors duration-200">
       {/* Cabecera compacta con toggle de modo oscuro y botón de datos */}
       <Header
         pantryCount={pantryIds.length}
@@ -84,8 +84,8 @@ export default function App() {
         onOpenBackupModal={() => setShowBackupModal(true)}
       />
 
-      {/* Contenedor principal con ergonomía móvil */}
-      <main className="max-w-xl mx-auto px-4 pt-4">
+      {/* Contenedor principal con ergonomía móvil (desde 320px) */}
+      <main className="max-w-xl mx-auto px-3 sm:px-4 pt-4 w-full">
         {/* Pestaña 1: Elegir los ingredientes que hay en casa */}
         {activeTab === 'en_casa' && (
           <PantrySelector
