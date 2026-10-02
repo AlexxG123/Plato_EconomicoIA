@@ -5,15 +5,12 @@
 
 import React, { useState } from 'react';
 import {
-  ShoppingCart,
   Check,
   Plus,
   Share2,
   Trash2,
   Utensils,
-  Copy,
   CheckCircle,
-  HelpCircle,
   Users
 } from 'lucide-react';
 import { Recipe, ShoppingItem } from '../types';
@@ -88,7 +85,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
       totalShoppingBudget
     );
 
-    // Intentamos API de compartir nativa (móvil) o portapapeles
     if (navigator.share) {
       navigator
         .share({
@@ -96,7 +92,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
           text: shareText
         })
         .catch(() => {
-          // Si el usuario cancela o falla, copiamos al portapapeles
           copyToClipboard(shareText);
         });
     } else {
@@ -111,7 +106,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
     });
   };
 
-  // Cuántos items restan comprar
   const totalItemsCount = shoppingList.length + extraShoppingItems.length;
   const boughtItemsCount =
     shoppingList.filter((i) => i.isBought).length +
@@ -123,29 +117,29 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
     <div className="pb-28">
       {/* Título Función 3 */}
       <div className="mb-4">
-        <span className="text-xs font-semibold text-emerald-700 tracking-wide uppercase">
+        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide uppercase">
           Paso 3 de 3
         </span>
-        <h2 className="text-xl font-bold text-stone-900">
+        <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">
           Lista de lo que falta comprar
         </h2>
-        <p className="text-xs text-stone-600 mt-1">
+        <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
           Solo los ingredientes que no tenés en casa, en su tamaño de compra habitual y con el total exacto a llevar al almacén o súper.
         </p>
       </div>
 
       {/* Tarjeta de Almuerzo Asociado */}
       {currentRecipe ? (
-        <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 mb-4">
+        <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-4 mb-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wide">
+              <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">
                 Almuerzo seleccionado:
               </span>
-              <h3 className="text-sm font-bold text-stone-900 leading-snug">
+              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 leading-snug">
                 {currentRecipe.title}
               </h3>
-              <div className="flex items-center gap-2 text-xs text-stone-600 mt-1">
+              <div className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 mt-1">
                 <Users className="w-3.5 h-3.5" />
                 <span>
                   {servings} {servings === 1 ? 'porción' : 'porciones'}
@@ -156,19 +150,23 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={onGoToLunchBuilder}
-              className="min-h-[38px] px-3 py-1.5 bg-white border border-stone-200 text-stone-700 text-xs font-medium rounded-lg hover:bg-stone-100 shrink-0 transition-colors"
+              className="min-h-[38px] px-3 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 shrink-0 transition-colors"
             >
               Cambiar plato
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 text-center">
-          <p className="text-xs text-amber-900 mb-2">No has seleccionado ningún almuerzo todavía.</p>
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-4 text-center">
+          <p className="text-xs text-amber-900 dark:text-amber-300 mb-2">
+            No has seleccionado ningún almuerzo todavía.
+          </p>
           <button
+            type="button"
             onClick={onGoToLunchBuilder}
-            className="px-4 py-2 bg-stone-900 text-white text-xs font-medium rounded-lg"
+            className="px-4 py-2 bg-stone-900 dark:bg-emerald-600 text-white text-xs font-medium rounded-lg"
           >
             Ir al Paso 2: Elegir Almuerzo
           </button>
@@ -176,7 +174,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
       )}
 
       {/* Resumen de Presupuesto de Bolsillo */}
-      <div className="bg-stone-900 text-white rounded-2xl p-4 mb-4 shadow-sm">
+      <div className="bg-stone-900 dark:bg-stone-800/90 text-white rounded-2xl p-4 mb-4 shadow-sm border border-transparent dark:border-stone-700">
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <span className="text-[11px] text-stone-400 block font-medium">
@@ -198,7 +196,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
         </div>
 
         {/* Barra de progreso de la compra */}
-        <div className="pt-2 border-t border-stone-800 flex items-center justify-between text-xs text-stone-400">
+        <div className="pt-2 border-t border-stone-800 dark:border-stone-700 flex items-center justify-between text-xs text-stone-400">
           <span>
             {boughtItemsCount} de {totalItemsCount} comprados
           </span>
@@ -210,18 +208,19 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
 
       {/* Si no falta nada: caso ideal */}
       {shoppingList.length === 0 && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3">
+        <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 text-center mb-4">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center mx-auto mb-3">
             <Utensils className="w-6 h-6" />
           </div>
-          <h4 className="text-base font-bold text-emerald-950 mb-1">
+          <h4 className="text-base font-bold text-emerald-950 dark:text-emerald-200 mb-1">
             ¡No tenés que comprar nada!
           </h4>
-          <p className="text-xs text-emerald-800 max-w-sm mx-auto mb-4">
+          <p className="text-xs text-emerald-800 dark:text-emerald-300 max-w-sm mx-auto mb-4">
             Tenés todos los ingredientes necesarios en tu alacena para preparar{' '}
             <span className="font-semibold">{currentRecipe?.title}</span>. Tu gasto de hoy es $0.
           </p>
           <button
+            type="button"
             onClick={onGoToLunchBuilder}
             className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-colors"
           >
@@ -233,29 +232,30 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
       {/* Lista de compras interactiva (Checklist para el súper) */}
       {shoppingList.length > 0 && (
         <div className="space-y-2 mb-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-stone-700 px-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-stone-700 dark:text-stone-300 px-1">
             <span>Ingredientes a comprar ({pendingCount} pendientes)</span>
-            <span className="text-[11px] text-stone-400 font-normal">
+            <span className="text-[11px] text-stone-400 dark:text-stone-500 font-normal">
               Tocá para tachar al poner en el changuito
             </span>
           </div>
 
           {shoppingList.map((item) => (
             <button
+              type="button"
               key={item.ingredientId}
               onClick={() => onToggleItemBought(item.ingredientId)}
               className={`w-full min-h-[58px] p-3 rounded-xl border text-left flex items-center justify-between transition-all select-none ${
                 item.isBought
-                  ? 'bg-stone-50 border-stone-200 text-stone-400'
-                  : 'bg-white border-stone-200 hover:border-stone-300 shadow-xs'
+                  ? 'bg-stone-50 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500'
+                  : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 shadow-xs'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0 pr-2">
                 <div
                   className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     item.isBought
-                      ? 'bg-stone-300 text-stone-600'
-                      : 'border-2 border-stone-300 text-transparent'
+                      ? 'bg-stone-300 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                      : 'border-2 border-stone-300 dark:border-stone-600 text-transparent'
                   }`}
                 >
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -264,12 +264,14 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
                 <div className="min-w-0">
                   <p
                     className={`text-sm font-semibold truncate ${
-                      item.isBought ? 'line-through text-stone-400' : 'text-stone-900'
+                      item.isBought
+                        ? 'line-through text-stone-400 dark:text-stone-500'
+                        : 'text-stone-900 dark:text-stone-100'
                     }`}
                   >
                     {item.name}
                   </p>
-                  <p className="text-[11px] text-stone-500 truncate">
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
                     {item.packPresentation} · Para {item.neededForServings}
                   </p>
                 </div>
@@ -278,12 +280,14 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
               <div className="text-right shrink-0">
                 <span
                   className={`text-sm font-bold tabular-nums block ${
-                    item.isBought ? 'line-through text-stone-400' : 'text-stone-900'
+                    item.isBought
+                      ? 'line-through text-stone-400 dark:text-stone-500'
+                      : 'text-stone-900 dark:text-stone-100'
                   }`}
                 >
                   {formatCurrency(item.estimatedCost)}
                 </span>
-                <span className="text-[10px] text-stone-400 block">precio est.</span>
+                <span className="text-[10px] text-stone-400 dark:text-stone-500 block">precio est.</span>
               </div>
             </button>
           ))}
@@ -293,7 +297,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
       {/* Extras agregados manualmente por el usuario */}
       {extraShoppingItems.length > 0 && (
         <div className="space-y-2 mb-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-stone-700 px-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-stone-700 dark:text-stone-300 px-1">
             <span>Extras anotados ({extraShoppingItems.length})</span>
           </div>
 
@@ -302,26 +306,29 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
               key={extra.id}
               className={`min-h-[52px] p-3 rounded-xl border flex items-center justify-between ${
                 extra.isBought
-                  ? 'bg-stone-50 border-stone-200 text-stone-400'
-                  : 'bg-white border-stone-200 shadow-xs'
+                  ? 'bg-stone-50 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-400 dark:text-stone-500'
+                  : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-xs'
               }`}
             >
               <button
+                type="button"
                 onClick={() => onToggleExtraBought(extra.id)}
-                className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                className="flex items-center gap-3 min-w-0 flex-1 text-left py-1"
               >
                 <div
                   className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                     extra.isBought
-                      ? 'bg-stone-300 text-stone-600'
-                      : 'border-2 border-stone-300 text-transparent'
+                      ? 'bg-stone-300 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                      : 'border-2 border-stone-300 dark:border-stone-600 text-transparent'
                   }`}
                 >
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
                 <span
                   className={`text-sm font-medium truncate ${
-                    extra.isBought ? 'line-through text-stone-400' : 'text-stone-900'
+                    extra.isBought
+                      ? 'line-through text-stone-400 dark:text-stone-500'
+                      : 'text-stone-900 dark:text-stone-100'
                   }`}
                 >
                   {extra.name}
@@ -332,15 +339,19 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
                 {extra.cost > 0 && (
                   <span
                     className={`text-xs font-bold tabular-nums ${
-                      extra.isBought ? 'line-through text-stone-400' : 'text-stone-800'
+                      extra.isBought
+                        ? 'line-through text-stone-400 dark:text-stone-500'
+                        : 'text-stone-800 dark:text-stone-200'
                     }`}
                   >
                     {formatCurrency(extra.cost)}
                   </span>
                 )}
                 <button
+                  type="button"
                   onClick={() => onRemoveExtraItem(extra.id)}
-                  className="min-h-[36px] min-w-[36px] flex items-center justify-center text-stone-400 hover:text-rose-600"
+                  aria-label={`Eliminar extra ${extra.name}`}
+                  className="min-h-[36px] min-w-[36px] flex items-center justify-center text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -353,9 +364,9 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
       {/* Formulario rápido para anotar algo más */}
       <form
         onSubmit={handleAddExtra}
-        className="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 mb-5"
+        className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-3.5 mb-5"
       >
-        <span className="text-xs font-bold text-stone-800 block mb-2">
+        <span className="text-xs font-bold text-stone-800 dark:text-stone-200 block mb-2">
           ¿Necesitás comprar algo más?
         </span>
         <div className="flex gap-2">
@@ -364,19 +375,19 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
             value={extraName}
             onChange={(e) => setExtraName(e.target.value)}
             placeholder="Ej: Pan, Fruta, Rollo de cocina..."
-            className="flex-1 px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            className="flex-1 px-3 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           />
           <input
             type="number"
             value={extraCost}
             onChange={(e) => setExtraCost(e.target.value)}
             placeholder="$ Est."
-            className="w-20 px-2 py-2 bg-white border border-stone-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            className="w-20 px-2 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           />
           <button
             type="submit"
             disabled={!extraName.trim()}
-            className="min-h-[38px] px-3 bg-stone-900 hover:bg-stone-800 disabled:opacity-40 text-white text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
+            className="min-h-[38px] px-3 bg-stone-900 dark:bg-emerald-600 hover:bg-stone-800 dark:hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Sumar</span>
@@ -387,6 +398,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
       {/* Botones de Acción: Compartir / Copiar y Reiniciar */}
       <div className="flex flex-col gap-2">
         <button
+          type="button"
           onClick={handleShareList}
           className="w-full min-h-[48px] py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors active:scale-[0.99]"
         >
@@ -395,16 +407,17 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
         </button>
 
         {copiedToast && (
-          <div className="text-center py-2 px-3 bg-emerald-50 text-emerald-800 text-xs font-medium rounded-lg border border-emerald-200 flex items-center justify-center gap-1.5 animate-fade-in">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="text-center py-2 px-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-medium rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-1.5 animate-fade-in">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>¡Lista copiada al portapapeles con formato listo!</span>
           </div>
         )}
 
         {boughtItemsCount > 0 && (
           <button
+            type="button"
             onClick={onResetPurchases}
-            className="w-full min-h-[44px] py-2 px-4 bg-white border border-stone-200 hover:bg-stone-50 text-stone-600 font-medium text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
+            className="w-full min-h-[44px] py-2 px-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 font-medium text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Desmarcar items comprados</span>

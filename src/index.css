@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html, body {
+    /* Evita que el gesto de deslizar hacia abajo en celulares active el 'pull-to-refresh' del navegador,
+       lo cual causaba que la app se recargara y reiniciara sola */
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
