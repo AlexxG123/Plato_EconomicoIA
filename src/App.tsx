@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlatoEconomico } from './hooks/usePlatoEconomico';
 import { useTheme } from './hooks/useTheme';
 import { Header } from './components/Header';
@@ -11,20 +11,9 @@ import { PantrySelector } from './components/PantrySelector';
 import { LunchBuilder } from './components/LunchBuilder';
 import { ShoppingList } from './components/ShoppingList';
 import { NavigationTabs, ActiveTab } from './components/NavigationTabs';
+import { DataBackupModal } from './components/DataBackupModal';
 
 const ACTIVE_TAB_KEY = 'plato_economico_active_tab_v1';
-
-const HASH_MAP: Record<string, ActiveTab> = {
-  'en-casa': 'en_casa',
-  'almuerzo': 'almuerzo',
-  'por-comprar': 'por_comprar'
-};
-
-const TAB_TO_HASH: Record<ActiveTab, string> = {
-  en_casa: 'en-casa',
-  almuerzo: 'almuerzo',
-  por_comprar: 'por-comprar'
-};
 
 export default function App() {
   const { isDark, toggleTheme } = useTheme();
@@ -50,76 +39,49 @@ export default function App() {
     addExtraShoppingItem,
     toggleExtraShoppingItemBought,
     removeExtraShoppingItem,
-    resetPurchases
+    resetPurchases,
+    exportDataJson,
+    importDataJson,
+    loadExampleStudentData,
+    clearAllData
   } = usePlatoEconomico();
 
-  // ATENCIÓN - SOLUCIÓN AL PROBLEMA DE REINICIO Y RETORNO A LA PÁGINA ANTERIOR:
-  // Inicializamos la pestaña desde URL Hash o LocalStorage para que si el navegador
-  // recarga o el teléfono suspende la pestaña, nunca regrese forzadamente al inicio.
-  const [activeTab, setActiveTabState] = useState<ActiveTab>(() => {
+  // Modal de Respaldo y Gestión de Datos
+  const [showBackupModal, setShowBackupModal] = useState(false);
+
+  // Pestaña activa: persistida en localStorage SIN manipular history.pushState ni hash
+  // (para evitar reinicios en iframes y navegadores móviles)
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     try {
-      const hash = window.location.hash.replace('#', '');
-      if (HASH_MAP[hash]) {
-        return HASH_MAP[hash];
-      }
       const saved = localStorage.getItem(ACTIVE_TAB_KEY) as ActiveTab | null;
-      if (saved && (saved === 'en_casa' || saved === 'almuerzo' || saved === 'por_comprar')) {
+      if (saved === 'en_casa' || saved === 'almuerzo' || saved === 'por_comprar') {
         return saved;
       }
     } catch {}
     return 'en_casa';
   });
 
-  // Cambiar pestaña actualizando URL hash e historial del navegador de forma segura
-  const changeTab = useCallback((newTab: ActiveTab, updateHistory = true) => {
-    setActiveTabState(newTab);
+  const handleTabChange = (newTab: ActiveTab) => {
+    setActiveTab(newTab);
     try {
       localStorage.setItem(ACTIVE_TAB_KEY, newTab);
-      const targetHash = '#' + TAB_TO_HASH[newTab];
-      if (updateHistory && window.location.hash !== targetHash) {
-        window.history.pushState(null, '', targetHash);
-      }
     } catch {}
-  }, []);
+  };
 
-  // Escuchar botón 'Atrás' del celular o del navegador (soporte Android / iOS)
-  useEffect(() => {
-    const handlePopState = () => {
-      const hash = window.location.hash.replace('#', '');
-      const mapped = HASH_MAP[hash];
-      if (mapped) {
-        setActiveTabState(mapped);
-        try {
-          localStorage.setItem(ACTIVE_TAB_KEY, mapped);
-        } catch {}
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // Sincronizar hash inicial si no había
-  useEffect(() => {
-    const targetHash = '#' + TAB_TO_HASH[activeTab];
-    if (window.location.hash !== targetHash) {
-      window.history.replaceState(null, '', targetHash);
-    }
-  }, [activeTab]);
-
-  // Scroll arriba suave al cambiar de pestaña
+  // Scroll suave al inicio al cambiar de pestaña
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased selection:bg-emerald-200 dark:selection:bg-emerald-800 transition-colors duration-200">
-      {/* Cabecera compacta con toggle de modo oscuro */}
+      {/* Cabecera compacta con toggle de modo oscuro y botón de datos */}
       <Header
         pantryCount={pantryIds.length}
         onResetPantry={clearPantry}
         isDark={isDark}
         onToggleTheme={toggleTheme}
+        onOpenBackupModal={() => setShowBackupModal(true)}
       />
 
       {/* Contenedor principal con ergonomía móvil */}
@@ -133,7 +95,7 @@ export default function App() {
             onSelectBasics={selectAllBasicPantry}
             onClearPantry={clearPantry}
             onAddCustomIngredient={addCustomIngredient}
-            onGoToLunch={() => changeTab('almuerzo')}
+            onGoToLunch={() => handleTabChange('almuerzo')}
           />
         )}
 
@@ -145,7 +107,7 @@ export default function App() {
             onSelectRecipe={(id) => setSelectedRecipeId(id)}
             servings={servings}
             onChangeServings={setServings}
-            onGoToShoppingList={() => changeTab('por_comprar')}
+            onGoToShoppingList={() => handleTabChange('por_comprar')}
             allIngredients={allIngredients}
             pantryIds={pantryIds}
           />
@@ -165,7 +127,7 @@ export default function App() {
             onToggleExtraBought={toggleExtraShoppingItemBought}
             onRemoveExtraItem={removeExtraShoppingItem}
             onResetPurchases={resetPurchases}
-            onGoToLunchBuilder={() => changeTab('almuerzo')}
+            onGoToLunchBuilder={() => handleTabChange('almuerzo')}
           />
         )}
       </main>
@@ -173,10 +135,20 @@ export default function App() {
       {/* Navegación inferior fija por pestañas optimizada para el pulgar en celulares */}
       <NavigationTabs
         activeTab={activeTab}
-        onChangeTab={(tab) => changeTab(tab)}
+        onChangeTab={handleTabChange}
         pantryCount={pantryIds.length}
         selectedRecipeTitle={currentRecipe?.title}
         missingItemsCount={shoppingList.length}
+      />
+
+      {/* Modal de Copia de Seguridad y Datos (JSON / LocalStorage) */}
+      <DataBackupModal
+        isOpen={showBackupModal}
+        onClose={() => setShowBackupModal(false)}
+        onExportJson={exportDataJson}
+        onImportJson={importDataJson}
+        onLoadExampleData={loadExampleStudentData}
+        onClearAllData={clearAllData}
       />
     </div>
   );

@@ -336,6 +336,66 @@ export function usePlatoEconomico() {
     setBoughtItemIds([]);
   }, []);
 
+  // --- RESPALDO: EXPORTAR A ARCHIVO JSON ---
+  const exportDataJson = useCallback(() => {
+    const backupData = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      appName: 'Plato Económico',
+      pantryIds,
+      customIngredients,
+      selectedRecipeId,
+      servings,
+      boughtItemIds,
+      extraShoppingItems
+    };
+    return JSON.stringify(backupData, null, 2);
+  }, [pantryIds, customIngredients, selectedRecipeId, servings, boughtItemIds, extraShoppingItems]);
+
+  // --- RESPALDO: IMPORTAR DESDE ARCHIVO JSON ---
+  const importDataJson = useCallback((jsonStr: string) => {
+    try {
+      const parsed = JSON.parse(jsonStr);
+      if (Array.isArray(parsed.pantryIds)) setPantryIds(parsed.pantryIds);
+      if (Array.isArray(parsed.customIngredients)) setCustomIngredients(parsed.customIngredients);
+      if (parsed.selectedRecipeId) setSelectedRecipeId(parsed.selectedRecipeId);
+      if (typeof parsed.servings === 'number') setServings(parsed.servings);
+      if (Array.isArray(parsed.boughtItemIds)) setBoughtItemIds(parsed.boughtItemIds);
+      if (Array.isArray(parsed.extraShoppingItems)) setExtraShoppingItems(parsed.extraShoppingItems);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: 'El archivo JSON no tiene un formato válido.' };
+    }
+  }, []);
+
+  // --- DATO DE EJEMPLO PRECARGADO (Para probar inmediatamente) ---
+  const loadExampleStudentData = useCallback(() => {
+    const examplePantry = ['arroz', 'huevos', 'cebolla', 'aceite', 'sal'];
+    const exampleRecipe = 'arroz-salteado-huevo-chaufa';
+    const exampleServings = 1;
+    const exampleExtras = [{ id: 'extra_manzanas', name: '2 Manzanas para postre', cost: 600, isBought: false }];
+
+    setPantryIds(examplePantry);
+    setSelectedRecipeId(exampleRecipe);
+    setServings(exampleServings);
+    setBoughtItemIds([]);
+    setExtraShoppingItems(exampleExtras);
+  }, []);
+
+  // --- BORRAR TODOS LOS DATOS ---
+  const clearAllData = useCallback(() => {
+    setPantryIds(DEFAULT_PANTRY_PRESETS);
+    setCustomIngredients([]);
+    setSelectedRecipeId(BUDGET_RECIPES[0].id);
+    setServings(1);
+    setBoughtItemIds([]);
+    setExtraShoppingItems([]);
+
+    try {
+      Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
+    } catch {}
+  }, []);
+
   return {
     // Datos maestros
     allIngredients,
@@ -363,6 +423,12 @@ export function usePlatoEconomico() {
     addExtraShoppingItem,
     toggleExtraShoppingItemBought,
     removeExtraShoppingItem,
-    resetPurchases
+    resetPurchases,
+
+    // Respaldo JSON y Gestión de datos
+    exportDataJson,
+    importDataJson,
+    loadExampleStudentData,
+    clearAllData
   };
 }

@@ -4,20 +4,22 @@
  */
 
 import React from 'react';
-import { UtensilsCrossed, RotateCcw, Moon, Sun } from 'lucide-react';
+import { UtensilsCrossed, RotateCcw, Moon, Sun, Database } from 'lucide-react';
 
 interface HeaderProps {
   pantryCount: number;
   onResetPantry: () => void;
   isDark: boolean;
   onToggleTheme: () => void;
+  onOpenBackupModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   pantryCount,
   onResetPantry,
   isDark,
-  onToggleTheme
+  onToggleTheme,
+  onOpenBackupModal
 }) => {
   return (
     <header className="sticky top-0 z-30 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 transition-colors">
@@ -37,14 +39,25 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Acciones: Contador, Modo Oscuro y Reinicio */}
-        <div className="flex items-center gap-1.5">
+        {/* Acciones: Contador, Respaldo JSON, Modo Oscuro y Reinicio */}
+        <div className="flex items-center gap-1">
           <div className="text-right hidden sm:block mr-2">
             <span className="text-xs font-semibold text-stone-800 dark:text-stone-200">
               {pantryCount} ingredientes
             </span>
             <span className="text-xs text-stone-500 dark:text-stone-400 block">en tu casa</span>
           </div>
+
+          {/* Botón Gestión de Datos y Respaldo */}
+          <button
+            type="button"
+            onClick={onOpenBackupModal}
+            title="Gestión de datos y respaldo JSON"
+            aria-label="Abrir gestión de datos y respaldo"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
+          >
+            <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          </button>
 
           {/* Botón Modo Oscuro / Claro */}
           <button
